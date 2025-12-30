@@ -11,6 +11,7 @@ import com.Rychlewski.CarteiraDigital.entity.TransactionEntity;
 import com.Rychlewski.CarteiraDigital.enums.AccountStatus;
 import com.Rychlewski.CarteiraDigital.enums.TransactionStatus;
 import com.Rychlewski.CarteiraDigital.enums.TransactionType;
+import com.Rychlewski.CarteiraDigital.exception.ResourceNotFoundException;
 import com.Rychlewski.CarteiraDigital.mapper.TransactionMapper;
 import com.Rychlewski.CarteiraDigital.repository.AccountRepository;
 import com.Rychlewski.CarteiraDigital.repository.TransactionRepository;
@@ -35,7 +36,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO deposit(DepositDTO dto) {
         AccountEntity account = accountRepository.findById(dto.getAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada."));
         if (account.getStatus() != AccountStatus.ATIVA) {
             throw new IllegalArgumentException("A conta não está ativa.");
         }
@@ -59,7 +60,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO withdraw(WithdrawDTO dto) {
         AccountEntity account = accountRepository.findById(dto.getAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada."));
         if (account.getStatus() != AccountStatus.ATIVA) {
             throw new IllegalArgumentException("A conta não está ativa.");
         }
@@ -86,7 +87,7 @@ public class TransactionService {
     @Transactional
     public TransactionResponseDTO transfer(TransferDTO dto) {
         AccountEntity account = accountRepository.findById(dto.getFromAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Conta de origem não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta de origem não encontrada."));
         AccountEntity counterAccount = accountRepository.findById(dto.getToAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Conta de destino não encontrada."));
         if (account.getStatus() != AccountStatus.ATIVA || counterAccount.getStatus() != AccountStatus.ATIVA) {
@@ -122,7 +123,7 @@ public class TransactionService {
 
     public List<TransactionResponseDTO> getStatement(Long accountId) {
         accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada."));
         List<TransactionEntity> transactions =
                 transactionRepository.findByAccountId(accountId);
         return transactions.stream()

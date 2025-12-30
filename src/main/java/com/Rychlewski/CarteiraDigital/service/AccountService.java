@@ -5,6 +5,8 @@ import com.Rychlewski.CarteiraDigital.dto.account.CreateAccountDTO;
 import com.Rychlewski.CarteiraDigital.entity.AccountEntity;
 import com.Rychlewski.CarteiraDigital.entity.ClientEntity;
 import com.Rychlewski.CarteiraDigital.enums.AccountStatus;
+import com.Rychlewski.CarteiraDigital.exception.ConflictException;
+import com.Rychlewski.CarteiraDigital.exception.ResourceNotFoundException;
 import com.Rychlewski.CarteiraDigital.mapper.AccountMapper;
 import com.Rychlewski.CarteiraDigital.repository.AccountRepository;
 import com.Rychlewski.CarteiraDigital.repository.ClientRepository;
@@ -27,10 +29,10 @@ public class AccountService {
 
     public AccountResponseDTO createAccount(CreateAccountDTO dto) {
         if (accountRepository.findByAgenciaAndNumero(dto.getAgencia(), dto.getNumero()).isPresent()) {
-            throw new IllegalArgumentException("Conta com essa agência e número já existe.");
+            throw new ConflictException("Conta com essa agência e número já existe.");
         }
         ClientEntity client = clientRepository.findById(dto.getClientId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada"));
         AccountEntity account = AccountMapper.toEntity(dto, client);
         AccountEntity savedAccount = accountRepository.save(account);
         return AccountMapper.toResponse(savedAccount);
@@ -38,14 +40,15 @@ public class AccountService {
 
     public AccountResponseDTO getAccountById(Long accountId) {
         AccountEntity account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada."));
         return AccountMapper.toResponse(account);
     }
 
     public List<AccountResponseDTO> getOwnerAccountById(Long ownerId) {
         List<AccountEntity> accounts = accountRepository.findByOwnerId(ownerId);
         if (accounts.isEmpty()) {
-            throw new IllegalArgumentException("Nenhuma conta encontrada para o proprietário.");
+            throw new ResourceNotFoundException("Conta não encontrada");
+
         }
         return accounts.stream()
                 .map(AccountMapper::toResponse)
@@ -54,7 +57,8 @@ public class AccountService {
 
     public boolean isAccountActive(Long accountId) {
         AccountEntity account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada"));
+        ;
 
         return account.getStatus() == AccountStatus.ATIVA;
     }

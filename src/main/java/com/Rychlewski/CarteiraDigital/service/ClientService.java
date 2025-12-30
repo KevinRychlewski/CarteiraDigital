@@ -4,6 +4,8 @@ import ch.qos.logback.core.net.server.Client;
 import com.Rychlewski.CarteiraDigital.dto.client.ClientResponseDTO;
 import com.Rychlewski.CarteiraDigital.dto.client.CreateClientDTO;
 import com.Rychlewski.CarteiraDigital.entity.ClientEntity;
+import com.Rychlewski.CarteiraDigital.exception.ConflictException;
+import com.Rychlewski.CarteiraDigital.exception.ResourceNotFoundException;
 import com.Rychlewski.CarteiraDigital.mapper.ClientMapper;
 import com.Rychlewski.CarteiraDigital.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,10 @@ public class ClientService {
 
     public ClientResponseDTO createClient(CreateClientDTO dto) {
         if (clientRepository.findByCpf(dto.getCpf()).isPresent()) {
-            throw new IllegalArgumentException("Cliente com o " + dto.getCpf() + " já existe");
+            throw new ConflictException("Cliente com o " + dto.getCpf() + " já existe");
         }
         if (clientRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Cliente com o " + dto.getEmail() + " já existe");
+            throw new ConflictException("Cliente com o " + dto.getEmail() + " já existe");
         }
         ClientEntity client = ClientMapper.toEntity(dto);
         System.out.println("CPF bruto: [" + dto.getCpf() + "]");
@@ -39,11 +41,11 @@ public class ClientService {
 
     public ClientResponseDTO getClientByCpf(String cpf) {
         Optional<ClientEntity> clientEntity = clientRepository.findByCpf(cpf);
-        return clientEntity.map(ClientMapper::toResponse).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+        return clientEntity.map(ClientMapper::toResponse).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 
     public ClientResponseDTO getClientById(Long id) {
         Optional<ClientEntity> client = clientRepository.findById(id);
-        return client.map(ClientMapper::toResponse).orElseThrow(() -> new IllegalArgumentException("Cliente não encontrado"));
+        return client.map(ClientMapper::toResponse).orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado"));
     }
 }

@@ -22,7 +22,6 @@ public class ClientMapper {
         dto.setCpf(entity.getCpf());
         dto.setEndereco(entity.getEndereco());
         dto.setEmail(entity.getEmail());
-        dto.setCreatedAt(entity.getCreatedAt());
         return dto;
     }
 
