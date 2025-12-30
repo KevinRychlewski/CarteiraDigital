@@ -9,6 +9,10 @@ public class CreateClientDTO {
 
     @NotBlank(message = "Nome não pode ser vazio")
     @Size(max = 120)
+    @Pattern(
+            regexp = "^[A-Za-zÀ-ÿ ]+$",
+            message = "Nome deve conter apenas letras"
+    )
     private String name;
 
     @NotBlank(message = "CPF não pode ser vazio")
