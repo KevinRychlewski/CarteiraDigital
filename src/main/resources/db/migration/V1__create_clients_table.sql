@@ -1,0 +1,9 @@
+CREATE TABLE clients (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    cpf VARCHAR(11) NOT NULL UNIQUE,
+    endereco VARCHAR(200) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
