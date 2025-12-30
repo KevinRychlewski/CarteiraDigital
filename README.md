@@ -5,7 +5,7 @@ API REST de uma Carteira Digital / Banco Simplificado, desenvolvida em Java + Sp
 Projeto criado para estudo e portfólio, seguindo boas práticas de arquitetura, validação e transações.
 
 Tecnologias utilizadas:
-- Java 17+
+- Java 21
 - Spring Boot
 - Spring Data JPA
 - Spring Validation
