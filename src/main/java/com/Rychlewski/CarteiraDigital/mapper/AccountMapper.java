@@ -24,6 +24,7 @@ public class AccountMapper {
         response.setAccountType(entity.getAccountType());
         response.setStatus(entity.getStatus());
         response.setSaldo(entity.getSaldo());
+        response.setCreatedAt(entity.getCreatedAt());
         return response;
     }
 

@@ -86,34 +86,47 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponseDTO transfer(TransferDTO dto) {
-        AccountEntity account = accountRepository.findById(dto.getFromAccountId())
+        AccountEntity fromAccount = accountRepository.findById(dto.getFromAccountId())
                 .orElseThrow(() -> new ResourceNotFoundException("Conta de origem não encontrada."));
-        AccountEntity counterAccount = accountRepository.findById(dto.getToAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("Conta de destino não encontrada."));
-        if (account.getStatus() != AccountStatus.ATIVA || counterAccount.getStatus() != AccountStatus.ATIVA) {
+        AccountEntity toAccount = accountRepository.findById(dto.getToAccountId())
+                .orElseThrow(() -> new ResourceNotFoundException("Conta de destino não encontrada."));
+        if (fromAccount.getStatus() != AccountStatus.ATIVA ||
+                toAccount.getStatus() != AccountStatus.ATIVA) {
             throw new IllegalArgumentException("Ambas as contas devem estar ativas.");
-        }
-        if (account.getSaldo().compareTo(dto.getValor()) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente.");
         }
         if (dto.getValor().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("O valor da transferência deve ser maior que zero.");
         }
-        account.setSaldo(account.getSaldo().subtract(dto.getValor()));
-        counterAccount.setSaldo(counterAccount.getSaldo().add(dto.getValor()));
+        if (fromAccount.getSaldo().compareTo(dto.getValor()) < 0) {
+            throw new IllegalArgumentException("Saldo insuficiente.");
+        }
+        fromAccount.setSaldo(fromAccount.getSaldo().subtract(dto.getValor()));
+        toAccount.setSaldo(toAccount.getSaldo().add(dto.getValor()));
 
-        TransactionEntity transaction = new TransactionEntity();
-        transaction.setAccount(account);
-        transaction.setCounterAccount(counterAccount);
-        transaction.setTransactionType(TransactionType.TRANSFERENCIA);
-        transaction.setValue(dto.getValor());
-        transaction.setStatus(TransactionStatus.COMPLETED);
-        transaction.setDescription(dto.getDescricao());
-        transaction.setCurrency("BRL");
+        TransactionEntity debitTransaction = new TransactionEntity();
+        debitTransaction.setAccount(fromAccount);
+        debitTransaction.setCounterAccount(toAccount);
+        debitTransaction.setTransactionType(TransactionType.TRANSFERENCIA);
+        debitTransaction.setValue(dto.getValor().negate());
+        debitTransaction.setStatus(TransactionStatus.COMPLETED);
+        debitTransaction.setDescription(dto.getDescricao());
+        debitTransaction.setCurrency("BRL");
 
-        TransactionEntity savedTransfer = transactionRepository.save(transaction);
-        return TransactionMapper.toResponse(savedTransfer);
+        TransactionEntity creditTransaction = new TransactionEntity();
+        creditTransaction.setAccount(toAccount);
+        creditTransaction.setCounterAccount(fromAccount);
+        creditTransaction.setTransactionType(TransactionType.TRANSFERENCIA);
+        creditTransaction.setValue(dto.getValor()); // positivo
+        creditTransaction.setStatus(TransactionStatus.COMPLETED);
+        creditTransaction.setDescription(dto.getDescricao());
+        creditTransaction.setCurrency("BRL");
+
+        transactionRepository.save(debitTransaction);
+        TransactionEntity savedCredit = transactionRepository.save(creditTransaction);
+
+        return TransactionMapper.toResponse(savedCredit);
     }
+
 
     public TransactionResponseDTO getTransactionById(Long transactionId) {
         TransactionEntity transaction = transactionRepository.findById(transactionId)
