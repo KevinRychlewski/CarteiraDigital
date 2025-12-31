@@ -23,10 +23,10 @@ public class ClientService {
 
     public ClientResponseDTO createClient(CreateClientDTO dto) {
         if (clientRepository.findByCpf(dto.getCpf()).isPresent()) {
-            throw new ConflictException("Cliente com o " + dto.getCpf() + " já existe");
+            throw new ConflictException("Não foi possível realizar o cadastro. Verifique os dados ou tente recuperar sua conta.");
         }
         if (clientRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new ConflictException("Cliente com o " + dto.getEmail() + " já existe");
+            throw new ConflictException("Não foi possível realizar o cadastro. Verifique os dados ou tente recuperar sua conta.");
         }
         ClientEntity client = ClientMapper.toEntity(dto);
         System.out.println("CPF bruto: [" + dto.getCpf() + "]");

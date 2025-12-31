@@ -24,6 +24,10 @@ public class CreateClientDTO {
 
     @NotBlank(message = "Endereço não pode ser vazio")
     @Size(max = 200)
+    @Pattern(
+            regexp = "^[A-Za-zÀ-ÿ ]+$",
+            message = "Endereço deve conter apenas letras"
+    )
     private String endereco;
 
     @NotBlank(message = "Email é obrigatório")
